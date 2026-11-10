@@ -1,0 +1,34 @@
+name: navigator_app
+description: "Розовый навигатор на Яндекс.Картах."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  # withValues(alpha:) требует Flutter 3.27+ (Dart 3.6+)
+  sdk: '>=3.6.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  go_router: ^14.2.0
+  yandex_maps_mapkit: ^4.42.0
+  geolocator: ^12.0.0
+  http: ^1.2.1
+  supabase_flutter: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+# --- ПРИНУДИТЕЛЬНОЕ ПОНИЖЕНИЕ ВЕРСИИ APP_LINKS ---
+dependency_overrides:
+  app_links: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/pink_marker.png
+    - assets/icons/app_icon.png
