@@ -61,11 +61,34 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
         run: flutter pub get
 
+      # Диагностика: показывает, что лежит в android/, и проверяет манифест.
+      # Без <meta-data android:name="flutterEmbedding" android:value="2"/> в
+      # android/app/src/main/AndroidManifest.xml Flutter падает с ошибкой
+      # "deleted Android v1 embedding".
+      - name: Check Android project
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          echo "--- файлы в android/ ---"
+          find android -type f \
+            -not -path '*/build/*' -not -path '*/.gradle/*' -not -name '*.png' \
+            | sort
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if [ ! -f "$MANIFEST" ]; then
+            echo "::error::Нет файла $MANIFEST. Положите туда главный манифест (из папки android/app/src/main/ архива)."
+            exit 1
+          fi
+          echo "--- $MANIFEST ---"
+          cat "$MANIFEST"
+          if ! grep -q 'flutterEmbedding' "$MANIFEST"; then
+            echo "::error::В $MANIFEST нет meta-data flutterEmbedding=2 (возможно, там лежит debug/profile-манифест)."
+            exit 1
+          fi
+
       - name: Analyze
         # Замечания анализатора не блокируют сборку APK;
         # настоящие ошибки компиляции упадут на шаге Build.
         working-directory: ${{ env.APP_DIR }}
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
         continue-on-error: true
 
       - name: Build release APK
