@@ -72,6 +72,19 @@ jobs:
           find android -type f \
             -not -path '*/build/*' -not -path '*/.gradle/*' -not -name '*.png' \
             | sort
+          # Flutter считает проект "не на Gradle" (и ругается на v1 embedding),
+          # если нет корневого android/build.gradle(.kts). Проверяем набор файлов.
+          MISSING=0
+          for f in android/build.gradle android/settings.gradle android/app/build.gradle; do
+            if [ ! -f "$f" ] && [ ! -f "$f.kts" ]; then
+              echo "::error::Нет файла $f(.kts) — в репозиторий не попала часть папки android/"
+              MISSING=1
+            fi
+          done
+          for f in android/gradle.properties android/gradle/wrapper/gradle-wrapper.properties; do
+            [ -f "$f" ] || { echo "::error::Нет файла $f"; MISSING=1; }
+          done
+          [ "$MISSING" = 0 ] || exit 1
           MANIFEST=android/app/src/main/AndroidManifest.xml
           if [ ! -f "$MANIFEST" ]; then
             echo "::error::Нет файла $MANIFEST. Положите туда главный манифест (из папки android/app/src/main/ архива)."
